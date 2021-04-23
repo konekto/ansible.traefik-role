@@ -1,0 +1,43 @@
+---
+- name: Ensure pip is installed
+  yum:
+    name: python3-pip
+    state: latest
+
+- name: Ensure python dependencies are installed
+  pip:
+    name:
+      - jsondiff
+      - pyyaml
+      - docker
+
+- name: Activate docker swarm
+  docker_swarm:
+    state: present
+    advertise_addr: "{{ ansible_facts.eth0.ipv4.address }}"
+  when: enable_docker_swarm
+
+- name: Create stack for treafik
+  template:
+    src: ./templates/traefik-stack.yaml.j2
+    dest: /opt/traefik-stack.yaml
+
+- name: Ensure cloud-public network exits
+  docker_network:
+      name: cloud-public
+      scope: swarm
+      driver: overlay
+
+- name: Undeploy traefik first
+  docker_stack:
+    state: absent
+    name: "{{ docker_stack_name }}"
+    compose:
+      - /opt/traefik-stack.yaml
+      -
+- name: Deploy stack from a compose file
+  docker_stack:
+    state: present
+    name: "{{ docker_stack_name }}"
+    compose:
+      - /opt/traefik-stack.yaml

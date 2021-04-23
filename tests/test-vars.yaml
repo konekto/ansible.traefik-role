@@ -1,0 +1,4 @@
+---
+acme_email: test@konek.to
+docker_stack_name: cloud-stack
+enable_docker_swarm: true

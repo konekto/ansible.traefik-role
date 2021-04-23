@@ -1,0 +1,31 @@
+version: "3.3"
+
+services:
+  reverse-proxy:
+    image: {{ traefik_image }}
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    command:
+      - --log.level={{ log_level }}
+      - --providers.docker=true
+      - --providers.docker.swarmMode=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=cloud-public
+      - --entrypoints.web.address=:80
+      - --entrypoints.web-secured.address=:443
+      - --certificatesresolvers.mytlschallenge.acme.httpChallenge.entrypoint=web
+      - --certificatesresolvers.mytlschallenge.acme.email={{acme_email}}
+      - --certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json
+    volumes:
+      - letsencrypt:/letsencrypt
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - cloud-public
+networks:
+  cloud-public:
+    external: true
+
+volumes:
+  letsencrypt:

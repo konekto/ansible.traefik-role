@@ -1,0 +1,7 @@
+---
+# defaults file for ansible-traefik
+acme_email: null
+docker_stack_name: cloud-swarm
+log_level: DEBUG
+traefik_image: traefik:v2.4
+enable_docker_swarm: false
